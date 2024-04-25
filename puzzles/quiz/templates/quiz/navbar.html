@@ -33,7 +33,7 @@
           <a class="btn btn-outline-danger me-2" href="{% url "logout" %}" role="button">Logout</a>
         {% else %}
           <a class="btn btn-outline-success me-2" href="{% url "login" %}" role="button">Login</a>
-          <a class="btn btn-outline-primary" href="#" role="button">Register</a>
+          <a class="btn btn-outline-primary" href="{% url "register" %}" role="button">Register</a>
         {% endif %}
       </div>
     </div>

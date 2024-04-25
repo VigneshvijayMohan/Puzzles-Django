@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from .models import Question, Category
 from django.contrib import messages
+from .forms import SignUpForm
 # Create your views here.
 
 
@@ -56,3 +57,25 @@ def logout_user(request):
 	logout(request)
 	messages.success(request, ("You have been logged out...Thanks for stopping by..."))
 	return redirect('home')
+
+
+def register_user(request):
+    form = SignUpForm()
+    if request.method == "POST":
+        form = SignUpForm(request.POST)
+        if form.is_valid():
+            form.save()
+            print("valid")
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password1']
+			# log in user
+            user = authenticate(username=username, password=password)
+            login(request, user)
+            messages.success(request, ("Username Created - Please Fill Out Your User Info Below..."))
+            return redirect('update_info')
+        else:
+            messages.success(request, ("Whoops! There was a problem Registering, please try again..."))
+            return redirect('register')
+    else:
+        return render(request, 'quiz/register.html', {'form':form})
+
