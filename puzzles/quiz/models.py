@@ -12,6 +12,11 @@ class Profile(models.Model):
         return self.user.username
     
 
+class Description(models.Model): 
+    description= models.CharField(max_length=200)
+    def __str__(self):
+        return self.description
+    
 class Category(models.Model):
     name = models.CharField(max_length=50)
 

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Puzzles</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+<style>
+    .quiz-container {
+        display: none; /* Initially hide quiz container */
+    }
+    .option {
+        margin: 10px 0;
+        padding: 15px 30px;
+        font-size: 18px;
+        border-radius: 10px;
+        cursor: pointer;
+    }
+    .option.correct {
+        background-color: lightgreen;
+    }
+    .option.wrong {
+        background-color: #ffcccc;
+    }
+    #time-left {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        font-size: 20px;
+        font-weight: bold;
+    }
+    .time-circle {
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        background-color: lightblue;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
+</head>
+<body>
+{% include "quiz/navbar.html" %}
+<div class="container">
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-9">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h2 class="card-title text-center mb-4">Quiz</h2>
+                    <div id="quiz-container" class="quiz-container text-center">
+                        <div id="question" class="question fs-4 mb-4"></div>
+                        <div id="options" class="options"></div>
+                    </div>
+                    <div id="time-left" class="time-circle">
+                        <span id="time-left-value">20</span>
+                    </div>
+                    <div class="text-center mt-3">
+                        <button id="start-quiz" class="btn btn-primary">Start Quiz</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+const questions = [
+    {
+        question: "What is the capital of France?",
+        options: ["London", "Paris", "Berlin", "Rome"],
+        answer: 1
+    },
+    {
+        question: "Which planet is known as the Red Planet?",
+        options: ["Mars", "Venus", "Jupiter", "Saturn"],
+        answer: 0
+    },
+    // Add more questions here
+];
+
+let currentQuestionIndex = 0;
+let timeLeft = 20;
+
+document.getElementById('start-quiz').addEventListener('click', () => startQuiz());
+
+function startQuiz() {
+    document.getElementById('start-quiz').style.display = 'none'; // Hide start button
+    document.querySelector('.quiz-container').style.display = 'block'; // Show quiz container
+    displayQuestion();
+}
+
+function displayQuestion() {
+    const questionElement = document.getElementById('question');
+    const optionsElement = document.getElementById('options');
+    const currentQuestion = questions[currentQuestionIndex];
+
+    questionElement.textContent = currentQuestion.question;
+    optionsElement.innerHTML = '';
+
+    currentQuestion.options.forEach((option, index) => {
+        const optionElement = document.createElement('button');
+        optionElement.classList.add('btn', 'btn-primary', 'option');
+        optionElement.textContent = option;
+        optionElement.addEventListener('click', () => selectOption(index));
+        optionsElement.appendChild(optionElement);
+    });
+
+    startTimer();
+}
+
+function selectOption(optionIndex) {
+    clearInterval(timerInterval);
+
+    const options = document.querySelectorAll('.option');
+    options[questions[currentQuestionIndex].answer].classList.add('correct');
+    
+    if (optionIndex === questions[currentQuestionIndex].answer) {
+        options[optionIndex].classList.add('correct');
+    } else {
+        options[optionIndex].classList.add('wrong');
+    }
+
+    setTimeout(() => {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < questions.length) {
+            displayQuestion();
+        } else {
+            alert('Quiz completed!');
+        }
+    }, 2000);
+}
+
+function startTimer() {
+    timeLeft = 20;
+    document.getElementById('time-left-value').textContent = timeLeft;
+
+    timerInterval = setInterval(() => {
+        timeLeft--;
+        document.getElementById('time-left-value').textContent = timeLeft;
+        if (timeLeft === 0) {
+            clearInterval(timerInterval);
+            selectOption(-1);
+        }
+    }, 1000);
+}
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
+</body>
+</html>
