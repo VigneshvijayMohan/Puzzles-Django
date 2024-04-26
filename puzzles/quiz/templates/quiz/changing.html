@@ -1,0 +1,115 @@
+{% extends "quiz/base.html" %}
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-9">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h2 class="card-title text-center">Quiz</h2>
+                    <div id="questionContainer">
+                        <form id="quizForm">
+                            {% for question in questions %}
+                            <div class="question {% if forloop.first %}active{% endif %}">
+                                <p>{{ question.text }}</p>
+                                <ul>
+                                    {% for option in question.options %}
+                                    <li>
+                                        <label style="{% if option.correct %}color: green;{% endif %}">
+                                            <input type="radio" name="question{{ forloop.parentloop.counter }}" value="{{ option.text }}">
+                                            {{ option.text }}
+                                        </label>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            {% endfor %}
+                            <button type="submit" class="btn btn-primary">Submit Answers</button>
+                        </form>
+                        <div id="result"></div>
+                    </div>
+                    <div id="timer" style="position: absolute; top: 10px; right: 10px; font-size: 18px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Timer functionality
+    let timeLeft = 10; // Time in seconds
+    const timerElement = document.getElementById('timer');
+    function updateTimer() {
+        timerElement.textContent = `Time left: ${timeLeft} seconds`;
+        if (timeLeft === 0) {
+            clearInterval(timerInterval);
+            showNextQuestion();
+        } else {
+            timeLeft--;
+        }
+    }
+    const timerInterval = setInterval(updateTimer, 1000);
+
+    // Question display functionality
+    const questions = document.querySelectorAll('.question');
+    let currentQuestionIndex = 0;
+
+    function showNextQuestion() {
+        questions[currentQuestionIndex].classList.remove('active');
+        currentQuestionIndex++;
+        if (currentQuestionIndex < questions.length) {
+            questions[currentQuestionIndex].classList.add('active');
+            timeLeft = 10; // Reset timer for the next question
+            timerInterval = setInterval(updateTimer, 1000); // Restart timer
+        } else {
+            // No more questions
+            document.getElementById('quizForm').remove();
+            timerElement.remove();
+            calculateScore();
+        }
+    }
+
+    // Show the first question
+    questions[currentQuestionIndex].classList.add('active');
+
+    // Submit form event listener
+    document.getElementById('quizForm').addEventListener('submit', function (event) {
+        event.preventDefault();
+        let score = 0;
+        const selectedOption = document.querySelector('input[type="radio"]:checked');
+        if (selectedOption !== null) {
+            if (selectedOption.parentElement.style.color === 'green') {
+                score++;
+            }
+            selectedOption.parentElement.style.color = 'green';
+            document.getElementById('result').innerHTML = `Your score: ${score * 500}`; // Display score for the current question
+        }
+        clearInterval(timerInterval);
+        setTimeout(showNextQuestion, 2000); // Show next question after 2 seconds
+    });
+
+    // Calculate and display final score
+    function calculateScore() {
+        let correctAnswers = document.querySelectorAll('.question label[style="color: green;"]').length;
+        document.getElementById('result').innerHTML = `Final score: ${correctAnswers * 500}`;
+    }
+    function saveScore(score) {
+    const formData = new FormData();
+    formData.append('score', score);
+    
+    fetch('/save_score/', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            console.log('Score saved successfully');
+        } else {
+            console.error('Failed to save score');
+        }
+    })
+    .catch(error => console.error('Error saving score:', error));
+}
+
+</script>
+{% endblock content %}
