@@ -1,0 +1,183 @@
+{% extends "quiz/base.html" %}
+{% block content %}
+<style>
+    .timer-container {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background-color: #eee;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 20px;
+        z-index: 1; /* Ensure the timer is above other elements */
+    }
+
+    .correct-answer {
+        background-color: green !important;
+    }
+
+    .wrong-answer {
+        background-color: red !important;
+    }
+
+    #questionText {
+        margin-top: 70px; /* Adjust the margin top to make space for the timer */
+    }
+</style>
+
+<div class="container">
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-9">
+            <div class="card shadow">
+                <div class="card-body" id="quizContainer">
+                    <h2 class="card-title text-center" id="questionText"></h2>
+                    <div class="timer-container">
+                        <span id="timer">20</span>
+                    </div>
+                    <br/><br/>
+                    <div class="row">
+                        <div class="col-md-6 text-center">
+                            <button class="btn btn-primary btn-block mb-3" type="button" id="option1"></button>
+                            <br/><br/>
+                            <button class="btn btn-primary btn-block" type="button" id="option2"></button>
+                        </div>
+                        <div class="col-md-6 text-center mt-3 mt-md-0">
+                            <button class="btn btn-primary btn-block mb-3" type="button" id="option3"></button>
+                            <br/><br/>
+                            <button class="btn btn-primary btn-block" type="button" id="option4"></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% comment %} <div class="row justify-content-center mt-3">
+        <div class="col-md-9 text-center">
+            <a href="{% url "home" %}"><button class="btn btn-success">Go to Home Page</button></a>
+        </div>
+    </div> {% endcomment %}
+</div>
+
+<script>
+    var questions = {{ questions | safe }};
+    var currentQuestionIndex = 0;
+    var quizContainer = document.getElementById("quizContainer");
+    var questionText = document.getElementById("questionText");
+    var option1 = document.getElementById("option1");
+    var option2 = document.getElementById("option2");
+    var option3 = document.getElementById("option3");
+    var option4 = document.getElementById("option4");
+    var timerDisplay = document.getElementById("timer");
+    var timerInterval;
+    var playerScore = 0;
+    var wrongAttempts = 0;
+
+    function loadQuestion() {
+        var currentQuestion = questions[currentQuestionIndex];
+        questionText.textContent = currentQuestion.text;
+        option1.textContent = currentQuestion.option1;
+        option2.textContent = currentQuestion.option2;
+        option3.textContent = currentQuestion.option3;
+        option4.textContent = currentQuestion.option4;
+        resetTimer();
+    
+        // Re-enable buttons
+        option1.disabled = false;
+        option2.disabled = false;
+        option3.disabled = false;
+        option4.disabled = false;
+    }
+    
+
+    function nextQuestion() {
+        clearInterval(timerInterval);
+    
+        // Reset button styles
+        option1.classList.remove("correct-answer", "wrong-answer");
+        option2.classList.remove("correct-answer", "wrong-answer");
+        option3.classList.remove("correct-answer", "wrong-answer");
+        option4.classList.remove("correct-answer", "wrong-answer");
+    
+        currentQuestionIndex++;
+        if (currentQuestionIndex < questions.length) {
+            loadQuestion();
+        } else {
+            displayScore();
+        }
+    }
+    
+
+    function startTimer() {
+        var timeLeft = 20;
+        timerInterval = setInterval(function() {
+            timeLeft--;
+            timerDisplay.textContent = timeLeft;
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                nextQuestion();
+            }
+        }, 1000);
+    }
+
+    function resetTimer() {
+        clearInterval(timerInterval);
+        timerDisplay.textContent = 20;
+        startTimer();
+    }
+
+    function checkAnswer(selectedOption) {
+        var currentQuestion = questions[currentQuestionIndex];
+        var correctOption = "option" + currentQuestion.correct_answer;
+        var selectedButton = document.getElementById(selectedOption);
+
+        if (selectedOption === correctOption) {
+            selectedButton.classList.add("correct-answer");
+            playerScore++;
+        } else {
+            selectedButton.classList.add("wrong-answer");
+            wrongAttempts++;
+        }
+        
+        // Disable other buttons to prevent further selection
+        option1.disabled = true;
+        option2.disabled = true;
+        option3.disabled = true;
+        option4.disabled = true;
+
+        // Wait for a moment before moving to the next question
+        setTimeout(nextQuestion, 1500);
+    }
+
+    function displayScore() {
+        var scorePercentage = (playerScore / questions.length) * 100;
+        var scoreText = "<h2 class='text-center'>Quiz Complete!</h2>" +
+                        "<p>Score: " + playerScore + "/" + questions.length + "</p>" +
+                        "<p>Percentage: " + scorePercentage.toFixed(2) + "%</p>" +
+                        "<p>Wrong Attempts: " + wrongAttempts + "</p>" +
+                        "<div class='row justify-content-center mt-3'>" +
+                        "<div class='col-md-9 text-center'>" +
+                        "<a href='{% url "home" %}'><button class='btn btn-success'>Go to Home Page</button></a>" +
+                        "</div></div>";
+        quizContainer.innerHTML = scoreText;
+    }
+    
+
+    option1.addEventListener("click", function() { checkAnswer("option1"); });
+    option2.addEventListener("click", function() { checkAnswer("option2"); });
+    option3.addEventListener("click", function() { checkAnswer("option3"); });
+    option4.addEventListener("click", function() { checkAnswer("option4"); });
+
+    document.addEventListener("keydown", function(event) {
+        if (event.key === " ") { // Change to any key you want to listen for
+            nextQuestion();
+        }
+    });
+
+    loadQuestion();
+</script>
+
+{% endblock content %}
