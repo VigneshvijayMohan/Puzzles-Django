@@ -57,7 +57,12 @@
     </div>
     {% comment %} <div class="row justify-content-center mt-3">
         <div class="col-md-9 text-center">
-            <a href="{% url "home" %}"><button class="btn btn-success">Go to Home Page</button></a>
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="score" value="{{ playerScore }}">
+                <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+                <button class="btn btn-success" type="submit">Save Score</button>
+            </form>
         </div>
     </div> {% endcomment %}
 </div>
@@ -75,8 +80,10 @@
     var timerInterval;
     var playerScore = 0;
     var wrongAttempts = 0;
+    var csrfToken = "{{ csrf_token }}";
 
     function loadQuestion() {
+        console.log("Loading question...");
         var currentQuestion = questions[currentQuestionIndex];
         questionText.textContent = currentQuestion.text;
         option1.textContent = currentQuestion.option1;
@@ -160,8 +167,9 @@
                         "<p>Wrong Attempts: " + wrongAttempts + "</p>" +
                         "<div class='row justify-content-center mt-3'>" +
                         "<div class='col-md-9 text-center'>" +
-                        "<a href='{% url "home" %}'><button class='btn btn-success'>Go to Home Page</button></a>" +
+                        "<form method='post'><input type='hidden' name='score' value='" + playerScore + "'><input type='hidden' name='csrfmiddlewaretoken' value='" + csrfToken + "'><button class='btn btn-success' type='submit'>Save Score</button></form>" +
                         "</div></div>";
+
         quizContainer.innerHTML = scoreText;
     }
     

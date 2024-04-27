@@ -1,0 +1,44 @@
+{% extends "quiz/base.html" %}
+{% block content %}
+
+<style>
+    /* CSS for table styling */
+    .container {
+        width: 100%; /* Ensure the container spans the entire width */
+    }
+
+    .row {
+        display: flex; /* Use flexbox for better alignment */
+        border-bottom: 1px solid #ddd; /* Add bottom border to each row */
+    }
+
+    .col {
+        flex: 1; /* Make each column equally sized */
+        padding: 10px; /* Add padding to the cells */
+    }
+
+    .row:last-child {
+        border-bottom: none; /* Remove bottom border from the last row */
+    }
+</style>
+
+<div class="container text-center">
+    <div class="row">
+        <div class="col"><h2>Rank</h2></div>
+        <div class="col"><h2>Player</h2></div>
+        <div class="col"><h2>Score</h2></div>
+        <div class="col"><h2>Category</h2></div>
+        <div class="col"><h2>Level</h2></div>
+    </div>
+    {% for score in scores %}
+    <div class="row">
+        <div class="col">{{ forloop.counter }}</div>
+        <div class="col">{{ score.player }}</div>
+        <div class="col">{{ score.percentage }}</div>
+        <div class="col">{{ score.category }}</div>
+        <div class="col">{{ score.level }}</div>
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock content %}
