@@ -3,6 +3,8 @@ from django.contrib.auth import authenticate, login, logout
 from .models import Question, Category, Level, ScoreBoard
 from django.contrib import messages
 import json
+from django.contrib.auth.decorators import login_required
+from django.urls import reverse
 from .forms import SignUpForm
 # Create your views here.
 
@@ -32,15 +34,27 @@ def page(request):
     science_question = Question.objects.filter(category=9)
     return render(request, "quiz/questions.html", {"questions":questions})
 
+
+@login_required
 def quiz(request, foo, level):
     foo = foo.replace("-", " ")
+    print(foo)
     level = level.capitalize()
     science_questions = Question.objects.filter(category__name=foo, levels__name=level).values("text", "option1", "option2", "option3", "option4", "correct_answer")
-    print(science_questions)
+
+    if request.method == 'POST':
+        player = request.user
+        total_questions = len(science_questions)
+        correct_answers = int(request.POST.get('score'))  # Assuming score is the number of correct answers
+        percentage = (correct_answers / total_questions) * 100
+        category = foo
+        level = level
+        ScoreBoard.objects.create(player=player, percentage=percentage, category = category, level = level)
+        messages.success(request, 'Your percentage has been saved successfully!')
+        return redirect(reverse('home'))  # Redirect to home page after saving percentage
+
+    
     return render(request, "quiz/puzzles.html", {"questions": json.dumps(list(science_questions))})
-
-
-
 
 
 def level_filter():
@@ -94,7 +108,15 @@ def register_user(request):
     else:
         return render(request, 'quiz/register.html', {'form':form})
 
-
+def score(request):
+    if request.user.is_authenticated:
+        scores = ScoreBoard.objects.all().order_by('-percentage') # Assuming Category is a model you've defined
+        context = {
+        'scores': scores
+    }
+        return render(request, "quiz/scorecard.html", context)
+    else:
+        return render(request, "quiz/login.html", {})
 
 # Category: Geography, ID: 1
 # Category: Literature, ID: 2

@@ -64,13 +64,17 @@ class Question(models.Model):
 
 
 
+from django.db import models
+from django.contrib.auth.models import User
+
 class ScoreBoard(models.Model):
-    player = models.ForeignKey(Player, on_delete=models.CASCADE)
+    player = models.ForeignKey(User, on_delete=models.CASCADE)
+    percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    category  = models.CharField(max_length=50, default = 0)
+    level =  models.CharField(max_length=50, default=0)
     
-    def get_score(self):
-        return self.player.points
-    
+
     def __str__(self):
-        return f"{self.player.first_name}'s Score"
+        return f"Percentage of {self.player.username}: {self.percentage}%"
 
 
