@@ -11,7 +11,7 @@ from .forms import SignUpForm
 
 def home(request):
     if request.user.is_authenticated:
-        categories = Category.objects.all()  # Assuming Category is a model you've defined
+        categories = Category.objects.all() 
         return render(request, "quiz/home.html", {"categories": categories})
     else:
         return render(request, "quiz/login.html", {})
@@ -19,14 +19,16 @@ def home(request):
 
 
 def about(request):
-    return render(request, "quiz/about.html", {})
+    categories = Category.objects.all()
+    return render(request, "quiz/about.html", {"categories": categories})
 
 
 
 
 def category(request, foo):
     foo = foo.replace("-", " ")
-    return render(request, "quiz/quiz.html", {"foo": foo})
+    categories = Category.objects.all()
+    return render(request, "quiz/quiz.html", {"foo": foo, "categories": categories})
 
 
 def page(request):
@@ -38,7 +40,6 @@ def page(request):
 @login_required
 def quiz(request, foo, level):
     foo = foo.replace("-", " ")
-    print(foo)
     level = level.capitalize()
     science_questions = Question.objects.filter(category__name=foo, levels__name=level).values("text", "option1", "option2", "option3", "option4", "correct_answer")
 
@@ -94,7 +95,6 @@ def register_user(request):
         form = SignUpForm(request.POST)
         if form.is_valid():
             form.save()
-            print("valid")
             username = form.cleaned_data['username']
             password = form.cleaned_data['password1']
 			# log in user
@@ -110,9 +110,11 @@ def register_user(request):
 
 def score(request):
     if request.user.is_authenticated:
+        categories = Category.objects.all() 
         scores = ScoreBoard.objects.all().order_by('-percentage') # Assuming Category is a model you've defined
         context = {
-        'scores': scores
+        'scores': scores,
+        "categories": categories,
     }
         return render(request, "quiz/scorecard.html", context)
     else:
