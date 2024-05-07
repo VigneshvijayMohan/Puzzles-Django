@@ -97,16 +97,18 @@ def register_user(request):
             form.save()
             username = form.cleaned_data['username']
             password = form.cleaned_data['password1']
-			# log in user
+            # log in user
             user = authenticate(username=username, password=password)
             login(request, user)
-            messages.success(request, ("Username Created - Please Fill Out Your User Info Below..."))
-            return redirect('update_info')
+            messages.success(request, "User Created successfully...")
+            return redirect('home')
         else:
-            messages.success(request, ("Whoops! There was a problem Registering, please try again..."))
-            return redirect('register')
+            messages.error(request, "Whoops! There was a problem Registering, please try again...")
+            # Pass the form with errors back to the template
+            return render(request, 'quiz/register.html', {'form': form})
     else:
-        return render(request, 'quiz/register.html', {'form':form})
+        return render(request, 'quiz/register.html', {'form': form})
+
 
 def score(request):
     if request.user.is_authenticated:
