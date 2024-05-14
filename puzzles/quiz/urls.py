@@ -7,6 +7,7 @@ urlpatterns = [
     path('quiz/<str:foo>/', views.category, name='category'),
     path('quiz/<str:foo>/<str:level>/', views.quiz, name='quiz'),
     path("page/", views.page, name="page"),
+    path("add/", views.add_question, name ="add"),
     path("login/",views.login_user, name = "login" ),
     path("logout/",views.logout_user, name = "logout" ),
     path("register/",views.register_user, name = "register" ),

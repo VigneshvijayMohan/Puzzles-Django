@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from django import forms
-
+from .models import Question, Category, Level
 
 
 class SignUpForm(UserCreationForm):
@@ -30,3 +30,74 @@ class SignUpForm(UserCreationForm):
 		self.fields['password2'].widget.attrs['placeholder'] = 'Confirm Password'
 		self.fields['password2'].label = ''
 		self.fields['password2'].help_text = '<span class="form-text text-muted"><small>Enter the same password as before, for verification.</small></span>'
+  
+  
+from django import forms
+from .models import Question, Category
+
+class QuestionForm(forms.ModelForm):
+    text = forms.CharField(
+        label="",
+        max_length=200,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Question'
+        })
+    )
+    option1 = forms.CharField(
+        label="",
+        max_length=200,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Option 1'
+        })
+    )
+    option2 = forms.CharField(
+        label="",
+        max_length=200,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Option 2'
+        })
+    )
+    option3 = forms.CharField(
+        label="",
+        max_length=200,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Option 3'
+        })
+    )
+    option4 = forms.CharField(
+        label="",
+        max_length=200,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Option 4'
+        })
+    )
+    correct_answer = forms.CharField(
+        label="",
+        max_length=200,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Correct answer Option Number'
+        })
+    )
+    category = forms.ModelChoiceField(
+        queryset=Category.objects.all(),
+        widget=forms.Select(attrs={
+            'class': 'form-control'
+        })
+    )
+
+    class Meta:
+        model = Question
+        fields = [
+            'text', 'category',
+            'option1', 'option2', 'option3',
+            'option4', 'correct_answer'
+        ]
+
+  
+  
