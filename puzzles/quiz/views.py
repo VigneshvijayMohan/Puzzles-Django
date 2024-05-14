@@ -5,7 +5,7 @@ from django.contrib import messages
 import json
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
-from .forms import SignUpForm
+from .forms import SignUpForm, QuestionForm
 # Create your views here.
 
 
@@ -113,7 +113,7 @@ def register_user(request):
 def score(request):
     if request.user.is_authenticated:
         categories = Category.objects.all() 
-        scores = ScoreBoard.objects.all().order_by('-percentage') # Assuming Category is a model you've defined
+        scores = ScoreBoard.objects.all().order_by('-percentage')
         context = {
         'scores': scores,
         "categories": categories,
@@ -121,6 +121,34 @@ def score(request):
         return render(request, "quiz/scorecard.html", context)
     else:
         return render(request, "quiz/login.html", {})
+    
+    
+def add_question(request):
+    if request.user.is_authenticated and request.user.is_superuser:
+        form = QuestionForm()
+        if request.method == "POST":
+            form = QuestionForm(request.POST)
+            
+            if form.is_valid():
+                
+                name  = form.cleaned_data['text']
+                question = Question.objects.filter(text = name)
+                if question:
+                    print("already unde")
+                    messages.error(request, "Whoops! Question already exists. Please try again...")
+                    return render(request, 'quiz/add.html', {'form': form})
+                else:
+                    form.save()
+                    messages.success(request, "Question Created successfully...")
+                    return redirect('home')
+            else:
+                messages.error(request, "Whoops! There was a problem registering the question. Please try again...")
+                return render(request, 'quiz/add.html', {'form': form})
+        else:
+            return render(request, 'quiz/add.html', {'form': form})
+    else:
+        messages.error(request, "Whoops! You don't have the permission to add new questions.")
+        return redirect('home')
 
 # Category: Geography, ID: 1
 # Category: Literature, ID: 2
